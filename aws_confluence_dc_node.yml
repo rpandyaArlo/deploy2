@@ -8,8 +8,8 @@
     atl_product_user: "confluence"
     atl_product_edition: "confluence"
 
-    atl_jdbc_encoding: 'UTF-8'
-    atl_jdbc_collation: 'en_US.UTF-8'
+    atl_jdbc_encoding: 'utf8mb4'
+    atl_jdbc_collation: 'utf8mb4_bin'
 
   roles:
     - role: linux_common
