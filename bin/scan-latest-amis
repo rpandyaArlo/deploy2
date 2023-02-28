@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Quick script to extract the latest version of the target Linux 2 AMI.
+
+REGIONS="ap-northeast-1 ap-northeast-2 ap-south-1 ap-southeast-1 ap-southeast-2 ca-central-1 eu-central-1 eu-north-1 eu-west-1 eu-west-2 eu-west-3 sa-east-1 us-east-1 us-east-2 us-west-1 us-west-2"
+
+for REGION in $REGIONS; do
+    ami=`aws --region "${REGION}" ec2 describe-images \
+       --owners amazon \
+       --filters Name=image-id,Values="ami-08970fb2e5767e3b8" \
+       --query 'sort_by(Images, &CreationDate)[-1].ImageId' \
+       --output text`
+    echo "${REGION}: $ami"
+done

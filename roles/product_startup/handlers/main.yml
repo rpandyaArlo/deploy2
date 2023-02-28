@@ -1,0 +1,15 @@
+---
+
+- name: Restart Product
+  service:
+    name: "{{ atl_systemd_service_name }}"
+    state: restarted
+  when: atl_startup_restart
+  no_log: true
+
+- name: Enable Product
+  service:
+    name: "{{ atl_systemd_service_name }}"
+    enabled: true
+  when: atl_startup_enable
+  no_log: true

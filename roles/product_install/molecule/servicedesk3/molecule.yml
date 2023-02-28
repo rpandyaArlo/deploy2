@@ -1,0 +1,31 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  - name: amazon_linux2
+    image: amazonlinux:2
+    groups:
+      - aws_node_local
+  - name: ubuntu_lts
+    image: ubuntu:bionic
+    groups:
+      - aws_node_local
+provisioner:
+  name: ansible
+  options:
+    vv: true
+    skip-tags: runtime_pkg
+  lint:
+    name: ansible-lint
+  inventory:
+    links:
+      group_vars: ../../../../group_vars/
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+    enabled: false

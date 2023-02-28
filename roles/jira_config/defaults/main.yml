@@ -1,0 +1,36 @@
+---
+
+atl_jvm_heap: "2048m"
+
+atl_catalina_opts: ""
+atl_catalina_opts_extra: >-
+  -XX:+UseG1GC
+  -XX:+PrintAdaptiveSizePolicy
+  -XX:+UseGCLogFileRotation
+  -XX:+PrintTenuringDistribution
+  -Dfile.encoding=UTF-8
+
+atl_tomcat_port: "8080"
+atl_tomcat_mgmt_port: "8005"
+atl_tomcat_acceptcount: "10"
+atl_tomcat_connectiontimeout: "20000"
+atl_tomcat_contextpath: ""
+atl_tomcat_maxthreads: "200"
+atl_tomcat_minsparethreads: "10"
+atl_tomcat_protocol: "HTTP/1.1"
+atl_tomcat_redirectport: ""
+atl_tomcat_scheme: "http"
+atl_tomcat_secure: "false"
+
+atl_db_poolminsize: '20'
+atl_db_poolmaxsize: '100'
+atl_db_minidle: '10'
+atl_db_maxidle: '20'
+
+atl_db_maxwaitmillis: '30000'
+atl_db_timebetweenevictionrunsmillis: '30000'
+atl_db_minevictableidletimemillis: '5000'
+atl_db_removeabandoned: 'true'
+atl_db_removeabandonedtimeout: '300'
+atl_db_testwhileidle: 'true'
+atl_db_testonborrow: 'false'

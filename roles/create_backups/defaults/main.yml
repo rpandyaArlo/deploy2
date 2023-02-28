@@ -1,0 +1,11 @@
+---
+
+atl_db_port: 5432
+atl_systemd_service_name: "{{ atl_product_family }}.service"
+
+atl_slingshot_yum_repo_url: 'https://packages.atlassian.com/atlassian-slingshot-rpm'
+atl_amazon_extras_postgresql_version: '9.6'
+
+atl_slingshot_deb_pubkey_url: 'https://packages.atlassian.com/api/gpg/key/public'
+atl_slingshot_deb_repo_url: 'https://packages.atlassian.com/atlassian-slingshot-deb'
+atl_slingshot_deb_repo_components: 'stable main'

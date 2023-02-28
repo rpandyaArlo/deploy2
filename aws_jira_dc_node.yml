@@ -1,0 +1,32 @@
+---
+- hosts: aws_node_local
+  become: true
+
+  vars:
+    # See group_vars/aws_node_local.yml, which pull vars from the environment.
+    atl_product_family: "jira"
+    atl_product_user: "jira"
+    atl_product_edition: "jira-{{ lookup('env', 'ATL_PRODUCT_EDITION') | lower }}"
+    atl_install_jsd_as_obr: "{{ lookup('env', 'ATL_JSD_ASOBR') }}"
+    atl_systemd_service_name: "jira.service"
+
+    atl_startup_systemd_params:
+      - "LimitNOFILE=16384"
+
+    atl_jdbc_encoding: 'UNICODE'
+    atl_jdbc_collation: 'C'
+    atl_jdbc_ctype: 'C'
+    atl_jdbc_template: 'template0'
+
+  roles:
+    - role: linux_common
+    - role: aws_common
+    - role: aws_shared_fs_config
+    - role: product_common
+    - role: product_install
+      tags: [skip_on_stack_update]
+    - role: database_init
+      tags: [skip_on_stack_update]
+    - role: restore_backups
+    - role: jira_config
+    - role: product_startup

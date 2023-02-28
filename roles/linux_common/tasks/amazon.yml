@@ -1,0 +1,9 @@
+---
+
+- name: Install Amazon-Linux-specific support packages
+  yum:
+    name:
+      - shadow-utils
+      - libxml2
+      - git-{{ git_version }}
+      - dejavu-sans-fonts

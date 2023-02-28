@@ -1,0 +1,162 @@
+---
+
+# This file is the place for cross-role defaults for all products, and
+# common parameters from the infrastructure-deployment phase of the
+# build (e.g. CloudFormation). Variables defined here will override
+# those defined in `<role>/defaults/main.yml`, although defaults
+# should usually be defined there too. For variable precedence
+# information see:
+#
+#    https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
+
+java_version: "1.8.0"
+postgres_version: "9.6"
+git_version: "2.14.4"
+atl_shared_mountpoint: "/media/atl"
+
+# Simplify NFS mapping by using a fixed UID
+atl_product_user_uid: "{{ lookup('env', 'ATL_PRODUCT_USER_UID') or '2001' }}"
+
+# FIXME: Some of these should be overridden from the environment?
+atl_home_base: "/data/atlassian/application-data"
+atl_product_home: "{{ atl_home_base }}/{{ atl_product_family }}"
+atl_product_shared_home_map:
+  confluence: "sharedconfluence"
+  jira: "sharedjira"
+  stash: "bitbucket/shared"
+  crowd: "crowd/shared"
+atl_product_home_shared: "{{ atl_shared_mountpoint }}/{{ atl_product_shared_home_map[atl_product_family] }}"
+atl_product_shared_plugins: "{{ atl_product_home_shared }}/plugins/installed-plugins"
+
+atl_installation_base: "/data/atlassian"
+atl_product_installation_base: "{{ atl_installation_base }}/{{ atl_product_edition }}"
+atl_product_installation_versioned: "{{ atl_product_installation_base }}/{{ atl_product_version }}"
+atl_product_installation_current: "{{ atl_product_installation_base }}/current"
+atl_installer_temp: "{{ atl_installation_base }}/tmp"
+
+atl_product_logs_default: &logs_default
+  - path: "{{ atl_product_installation_current }}/logs/*"
+    type: product
+  - path: "{{ atl_product_home }}/logs/*"
+    type: product
+  - path: "{{ atl_product_home }}/log/*"
+    type: product
+  - path: "{{ atl_product_home }}/logs/audit/*"
+    type: audit
+  - path: "{{ atl_product_home }}/log/audit/*"
+    type: audit
+  - path: "/var/log/ansible-bootstrap.log"
+    type: provisioning
+  - path: "/var/log/cfn-*.log"
+    type: provisioning
+
+atl_product_logs:
+  confluence:
+    *logs_default
+  jira:
+    *logs_default
+  stash:
+    *logs_default
+  crowd:
+    *logs_default
+
+
+#  The following are imports from the environment. These are generally
+#  set in /etc/atl by the CloudFormation template and sourced before
+#  Ansible is run. See bin/ansible-with-atl-env for a convenient wrapper
+atl_product_version: "{{ lookup('env', 'ATL_PRODUCT_VERSION') | lower }}"
+
+atl_efs_id: "{{ lookup('env', 'ATL_EFS_ID') }}"
+atl_aws_stack_name: "{{ lookup('env', 'ATL_AWS_STACK_NAME') }}"
+atl_aws_region: "{{ lookup('env', 'ATL_AWS_REGION') }}"
+atl_aws_iam_role: "{{ lookup('env', 'ATL_AWS_IAM_ROLE') }}"
+atl_aws_iam_role_arn: "{{ lookup('env', 'ATL_AWS_IAM_ROLE_ARN') }}"
+
+atl_aws_enable_cloudwatch: "{{ lookup('env', 'ATL_AWS_ENABLE_CLOUDWATCH')|bool or false }}"
+atl_aws_enable_cloudwatch_logs: "{{ lookup('env', 'ATL_AWS_ENABLE_CLOUDWATCH_LOGS')|bool or false }}"
+
+atl_db_engine: "{{ lookup('env', 'ATL_DB_ENGINE') }}"
+atl_db_host: "{{ lookup('env', 'ATL_DB_HOST') }}"
+atl_db_port: "{{ lookup('env', 'ATL_DB_PORT') or '5432' }}"
+atl_db_root_db_name: "{{ lookup('env', 'ATL_DB_ROOT_DB_NAME') or 'postgres' }}"
+atl_db_root_user: "{{ lookup('env', 'ATL_DB_ROOT_USER') or 'postgres' }}"
+atl_db_root_password: "{{ lookup('env', 'ATL_DB_ROOT_PASSWORD') }}"
+atl_db_driver: "{{ lookup('env', 'ATL_DB_DRIVER') or 'org.postgresql.Driver' }}"
+
+atl_db_poolminsize: "{{ lookup('env', 'ATL_DB_POOLMINSIZE') or '20' }}"
+atl_db_poolmaxsize: "{{ lookup('env', 'ATL_DB_POOLMAXSIZE') or '100' }}"
+atl_db_minidle: "{{ lookup('env', 'ATL_DB_MINIDLE') or '10' }}"
+atl_db_maxidle: "{{ lookup('env', 'ATL_DB_MAXIDLE') or '20' }}"
+
+atl_db_maxwaitmillis: "{{ lookup('env', 'ATL_DB_MAXWAITMILLIS') or '30000' }}"
+atl_db_timebetweenevictionrunsmillis: "{{ lookup('env', 'ATL_DB_TIMEBETWEENEVICTIONRUNSMILLIS') or '30000' }}"
+atl_db_minevictableidletimemillis: "{{ lookup('env', 'ATL_DB_MINEVICTABLEIDLETIMEMILLIS') or '5000' }}"
+atl_db_removeabandoned: "{{ lookup('env', 'ATL_DB_REMOVEABANDONED') or 'true' }}"
+atl_db_removeabandonedtimeout: "{{ lookup('env', 'ATL_DB_REMOVEABANDONEDTIMEOUT') or '300' }}"
+atl_db_testwhileidle: "{{ lookup('env', 'ATL_DB_TESTWHILEIDLE') or 'true'}}"
+atl_db_testonborrow: "{{ lookup('env', 'ATL_DB_TESTONBORROW') or 'false' }}"
+atl_db_engine_to_db_type_map:
+  aurora_postgres: "postgresaurora96"
+  rds_postgres: "postgres14"
+  rds_mysql: "mysql8"
+atl_db_type: "{{ atl_db_engine_to_db_type_map[atl_db_engine] | default('postgres14') }}"
+atl_db_general_type_map:
+  aurora_postgres: "postgres"
+  rds_postgres: "postgres"
+  rds_mysql: "mysql"
+atl_db_general_type: "{{ atl_db_general_type_map[atl_db_engine] }}"
+
+atl_jdbc_db_name: "{{ lookup('env', 'ATL_JDBC_DB_NAME') }}"
+atl_jdbc_user: "{{ lookup('env', 'ATL_JDBC_USER') }}"
+atl_jdbc_password: "{{ lookup('env', 'ATL_JDBC_PASSWORD') }}"
+atl_jdbc_encoding: "{{ lookup('env', 'ATL_JDBC_ENCODING') or 'UTF-8' }}"
+atl_jdbc_collation: "{{ lookup('env', 'ATL_JDBC_COLLATION') or 'en_US.UTF-8' }}"
+atl_jdbc_ctype: "{{ lookup('env', 'ATL_JDBC_CTYPE') or 'en_US.UTF-8' }}"
+atl_jdbc_template: "{{ lookup('env', 'ATL_JDBC_TEMPLATE') or 'template1' }}"
+atl_jdbc_query_params_for_engine:
+  aurora_postgres: "?targetServerType=master"
+  rds_mysql: "?useUnicode=true&amp;characterEncoding=UTF8&amp;sessionVariables=default_storage_engine=InnoDB"
+atl_jdbc_url: "jdbc:{{ atl_db_general_type }}://{{ atl_db_host }}:{{ atl_db_port }}/{{ atl_jdbc_db_name }}{{ atl_jdbc_query_params_for_engine[atl_db_engine]| default('') }}"
+
+atl_jvm_heap: "{{ lookup('env', 'ATL_JVM_HEAP') or '2048m' }}"
+atl_jvm_opts: "{{ lookup('env', 'ATL_JVM_OPTS') or '' }}"
+atl_catalina_opts: "{{ lookup('env', 'ATL_CATALINA_OPTS') or '' }}"
+atl_proxy_name:  "{{ lookup('env', 'ATL_PROXY_NAME') | lower }}"
+atl_proxy_port:  "{{ lookup('env', 'ATL_TOMCAT_PROXYPORT') }}"
+atl_tomcat_port: "{{ lookup('env', 'ATL_TOMCAT_DEFAULTCONNECTORPORT') or '8080' }}"
+atl_ssl_proxy: "{{ lookup('env', 'ATL_SSL_PROXY') or 'false' }}"
+
+atl_tomcat_acceptcount: "{{ lookup('env', 'ATL_TOMCAT_ACCEPTCOUNT') or '10' }}"
+atl_tomcat_connectiontimeout: "{{ lookup('env', 'ATL_TOMCAT_CONNECTIONTIMEOUT') or '20000' }}"
+atl_tomcat_contextpath: "{{ lookup('env', 'ATL_TOMCAT_CONTEXTPATH') or '' }}"
+atl_tomcat_enablelookups: "{{ lookup('env', 'ATL_TOMCAT_ENABLELOOKUPS') or 'false' }}"
+atl_tomcat_maxthreads: "{{ lookup('env', 'ATL_TOMCAT_MAXTHREADS') or '200' }}"
+atl_tomcat_minsparethreads: "{{ lookup('env', 'ATL_TOMCAT_MINSPARETHREADS') or '10' }}"
+atl_tomcat_protocol: "{{ lookup('env', 'ATL_TOMCAT_PROTOCOL') or 'HTTP/1.1' }}"
+atl_tomcat_redirectport: "{{ lookup('env', 'ATL_TOMCAT_REDIRECTPORT') or '' }}"
+atl_tomcat_scheme: "{{ lookup('env', 'ATL_TOMCAT_SCHEME') or 'http' }}"
+atl_tomcat_secure: "{{ lookup('env', 'ATL_TOMCAT_SECURE') or 'false' }}"
+
+atl_fileserver_host: "{{ lookup('env', 'ATL_FILESERVER_IP') }}"
+atl_elasticsearch_host: "{{ lookup('env', 'ATL_ELASTICSEARCH_HOST') }}"
+atl_elasticsearch_endpoint: "http://{{ atl_elasticsearch_host }}"
+atl_elasticsearch_s3_bucket: "{{ lookup('env', 'ATL_ELASTICSEARCH_S3_BUCKET') }}"
+
+atl_nfs_server_device: "{{ lookup('env', 'ATL_NFS_SERVER_DEVICE') }}"
+atl_nfs_disk_volume_type: "{{ lookup('env', 'ATL_NFS_DISK_VOLUME_TYPE') }}"
+atl_nfs_disk_volume_iops: "{{ lookup('env', 'ATL_NFS_DISK_VOLUME_IOPS') }}"
+atl_rds_instance_id: "{{ lookup('env', 'ATL_RDS_INSTANCE_ID') }}"
+atl_rds_instance_class: "{{ lookup('env', 'ATL_RDS_INSTANCE_CLASS') }}"
+atl_rds_multi_az: "{{ lookup('env', 'ATL_RDS_MULTI_AZ') }}"
+atl_rds_subnet_group_name: "{{ lookup('env', 'ATL_RDS_SUBNET_GROUP_NAME') }}"
+atl_rds_security_group: "{{ lookup('env', 'ATL_RDS_SECURITY_GROUP') }}"
+
+atl_backup_manifest_url: "{{ lookup('env', 'ATL_BACKUP_MANIFEST_URL') }}"
+atl_restore_required: "{{ atl_backup_manifest_url is defined and atl_backup_manifest_url != '' }}"
+
+
+atl_bitbucket_license_key: "{{ lookup('env', 'ATL_BB_LICENSEKEY') }}"
+atl_bitbucket_admin_password: "{{ lookup('env', 'ATL_BB_ADMIN_PASSWORD') }}"
+
+atl_bitbucket_dataset_url: "{{ lookup('env', 'ATL_DATASET_URL') }}"
+atl_bitbucket_baseurl: "{{ lookup('env', 'ATL_BB_BASEURL') }}"

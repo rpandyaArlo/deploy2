@@ -1,0 +1,17 @@
+---
+- hosts: aws_node_local
+  become: true
+
+  vars:
+    # See group_vars/aws_node_local.yml, which pull vars from the environment.
+    atl_product_family: "nfs_server"
+    atl_product_edition: "nfs_server"
+    atl_product_user: "atlassian"
+
+    atl_nfs_mountpoint: "{{ atl_shared_mountpoint }}/{{ atl_product_user }}/shared"
+    atl_nfs_target: "{{ atl_shared_mountpoint }}/{{ atl_product_user }}/shared"
+
+  roles:
+    - role: linux_common
+    - role: aws_common
+    - role: nfs_server

@@ -1,0 +1,9 @@
+---
+
+- name: Fetch the ServiceDesk metadata from marketplace
+  set_fact:
+    atl_servicedesk_version_json: "{{ lookup('url', '{{ atl_servicedesk_latest_url }}') }}"
+
+- name: Set the version for ServiceDesk
+  set_fact:
+    atl_latest_version: "{{ atl_servicedesk_version_json.name }}"

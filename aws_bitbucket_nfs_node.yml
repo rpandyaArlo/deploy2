@@ -1,0 +1,18 @@
+---
+- hosts: aws_node_local
+  become: true
+
+  vars:
+    # See group_vars/aws_node_local.yml, which pull vars from the environment.
+    atl_product_family: "stash"
+    atl_product_edition: "bitbucket"
+    atl_product_user: "bitbucket"
+
+    atl_nfs_mountpoint: "{{ atl_shared_mountpoint }}/bitbucket/shared"
+    atl_nfs_target: "{{ atl_shared_mountpoint }}/bitbucket/shared"
+
+  roles:
+    - role: linux_common
+    - role: aws_common
+    - role: nfs_server
+    - role: diy_backup

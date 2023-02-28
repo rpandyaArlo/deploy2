@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  - name: amazon_linux2
+    image: amazonlinux:2
+#
+# Temporarily (1st April 2020) removing ubuntu as a test platform.
+# The atlassian-slingshot debian (Ubuntu) repository is at present
+# malformed and is currently missing its 'Release' file. As a result
+# when this test executes and tries to pull the `ubuntu_lts` archive
+# (see ubuntu.yml task) it fails with the following error:
+#
+# "The repository 'https://packages.atlassian.com/atlassian-slingshot-deb
+# stable Release' does not have a Release file."
+#
+# See: https://bulldog.internal.atlassian.com/browse/DCD-964 which has
+# been raised to resolve this issue and fix the Ubuntu Slingshot
+# distribution
+#
+# TODO: Activate the config below (un-comment) once the issue described above
+# has been resolved.
+#
+#  - name: ubuntu_lts
+#    image: ubuntu:bionic
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+verifier:
+  name: testinfra
+  lint:
+    name: flake8

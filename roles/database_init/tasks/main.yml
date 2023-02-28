@@ -1,0 +1,11 @@
+---
+
+- name: Include database specific configuration
+  include_vars:
+    file: "{{ mysql }}.yml"
+    paths:
+      -  'vars'
+
+- name: Initialise database 
+  include_tasks: "{{ atl_db_general_type }}.yml" # TODO this is done to have same tasks for aurora and postgres
+  

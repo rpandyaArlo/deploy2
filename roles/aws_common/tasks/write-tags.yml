@@ -1,0 +1,73 @@
+---
+
+- name: Retrieve all available EC2 tags
+  ec2_tag:
+    region: "{{ ansible_ec2_placement_region }}"
+    resource: "{{ ansible_ec2_instance_id }}"
+    state: list
+  register: ec2_instance_tags
+  ignore_errors: true
+  tags:
+    - notest
+
+- name: Retrieve autoscaling group
+  set_fact:
+    ec2_autoscaling_group: "{{ ec2_instance_tags.tags['aws:autoscaling:groupName'] | default('') }}"
+
+# Because Ansible - https://github.com/ansible/ansible/issues/11905#issuecomment-130496173
+- name: Set fact to store boolean 'atl_restore_required' value as as array of one string
+  set_fact:
+    atl_restore_required_tag_value: ["{{ atl_restore_required | lower }}"]
+
+- block:
+    # No existing timestamp, so this is a first run. Persist some metadata into the ASG.
+    - name: Fetch the git revision for this repo
+      command:
+        cmd: git rev-parse HEAD
+      register: git_out
+
+    - name: Setup the new ASG tags
+      set_fact:
+        deployment_firstrun_meta:
+          - ResourceType: "auto-scaling-group"
+            ResourceId: "{{ ec2_autoscaling_group }}"
+            PropagateAtLaunch: true
+            Key: "atl:deployment:commit-id"
+            Value: "COMMIT: {{ git_out.stdout }}"
+
+          - ResourceType: "auto-scaling-group"
+            ResourceId: "{{ ec2_autoscaling_group }}"
+            PropagateAtLaunch: true
+            Key: "atl:deployment:first-run-timestamp"
+            Value: "TIMESTAMP: {{ ansible_date_time.iso8601 }}"
+
+          - ResourceType: "auto-scaling-group"
+            ResourceId: "{{ ec2_autoscaling_group }}"
+            PropagateAtLaunch: true
+            Key: "atl:deployment:is-stack-restored"
+            Value: "{{ atl_restore_required_tag_value.0 }}"
+
+
+    # Set the tags on the ASG and the local instance. We need to
+    # ignore errors as it's possible we don't have the permissions,
+    # and we can't check up-front.
+    - name: Set the first-run tags on the ASG ("FAIL" is not critical)
+      command: "aws autoscaling
+                    create-or-update-tags
+                    --region {{ ansible_ec2_placement_region }}
+                    --tags '{{ deployment_firstrun_meta | to_json }}'"
+      ignore_errors: true
+
+    - name: Set the tags on the local instance ("FAIL" is not critical)
+      ec2_tag:
+        region: "{{ ansible_ec2_placement_region }}"
+        resource: "{{ ansible_ec2_instance_id }}"
+        tags:
+          "atl:deployment:commit-id": "COMMIT: {{ git_out.stdout }}"
+          "atl:deployment:first-run-timestamp": "TIMESTAMP: {{ ansible_date_time.iso8601 }}"
+          "atl:deployment:is-stack-restored": "{{ atl_restore_required_tag_value.0 }}"
+      ignore_errors: true
+
+  when:
+    - ec2_autoscaling_group != ''
+    - ec2_instance_tags.tags['atl:deployment:first-run-timestamp'] is not defined

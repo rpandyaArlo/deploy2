@@ -1,0 +1,13 @@
+# Runs atlassian-slingshot to backup your product instance. Should be run when there is only 1 app node (i.e server or single node cluster)
+# Params
+# Required
+# atl_product_family - should be "jira", "confluence", or "stash"
+# atl_slingshot_backup_dir - working directory for the backup, should be large enough to fit database and shared home dumps
+# atl_s3_backup_bucket - s3 bucket to upload your backup to
+# atl_s3_backup_region - AWS region where the s3 bucket is deployed
+#
+# There are other variables which can be overriden. See the tasks for details. The will be defaulted by the role defaults or the inventory group_vars
+
+- hosts: aws_node_local
+  roles:
+    - role: create_backups

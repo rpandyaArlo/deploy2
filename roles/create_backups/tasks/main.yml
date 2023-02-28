@@ -1,0 +1,39 @@
+---
+
+- name: Install distro-specific backup support packages
+  include_tasks: "{{ ansible_distribution|lower }}.yml"
+
+- name: Stop the {{ atl_product_family }} service
+  service:
+    name: "{{ atl_systemd_service_name }}"
+    state: stopped
+
+- name: Run the slingshot backup
+  command:
+    argv:
+      - "atlassian-slingshot"
+      - "backup"
+      - "--backupDir"
+      - "{{ atl_slingshot_backup_dir }}"
+      - "--dbHost"
+      - "{{ atl_db_host }}"
+      - "--dbPort"
+      - "{{ atl_db_port }}"
+      - "--dbUser"
+      - "{{ atl_jdbc_user }}"
+      - "--dbName"
+      - "{{ atl_jdbc_db_name }}"
+      - "--s3BucketName"
+      - "{{ atl_s3_backup_bucket }}"
+      - "--awsRegion"
+      - "{{ atl_s3_backup_region }}"
+      - "--sharedHomeLocation"
+      - "{{ atl_product_home_shared }}"
+      - "--isAutomation"
+  environment:
+    ATL_DB_PASSWORD: "{{ atl_jdbc_password }}"
+
+- name: Restart the {{ atl_product_family }} service
+  service:
+    name: "{{ atl_systemd_service_name }}"
+    state: restarted

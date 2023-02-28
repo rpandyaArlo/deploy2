@@ -1,0 +1,27 @@
+---
+- name: Install gnupg
+  apt:
+    name: gnupg
+    state: present
+
+- name: Add atlassian-slingshot debian repo public key
+  apt_key:
+    url: "{{ atl_slingshot_deb_pubkey_url }}"
+    state: present
+
+- name: Add atlassian-slingshot debian repository
+  apt_repository:
+    repo: "deb {{ atl_slingshot_deb_repo_url }} {{ atl_slingshot_deb_repo_components }}"
+    state: present
+    filename: atlassian-slingshot
+
+- name: Install atlassian-slingshot
+  apt:
+    name: atlassian-slingshot
+    update_cache: yes
+    state: present
+
+- name: Install postgresql
+  apt:
+    name: postgresql
+    state: present

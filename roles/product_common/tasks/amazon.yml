@@ -1,0 +1,12 @@
+---
+
+- name: Install JDK if necessary on Amazon Linux
+  yum:
+    name:
+      - java-{{ java_version }}-openjdk-devel
+  when: atl_use_system_jdk
+
+- name: Install other base packages on Amazon Linux
+  yum:
+    name:
+      - dejavu-fonts-common  # Required by the installer

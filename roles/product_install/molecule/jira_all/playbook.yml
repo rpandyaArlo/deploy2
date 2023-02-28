@@ -1,0 +1,28 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    atl_product_family: "jira"
+    atl_product_edition: "jira-software"
+    atl_product_user: "jira"
+    atl_product_version: "7.13.1"
+    atl_install_jsd_as_obr: true
+    atl_systemd_service_name: "jira.service"
+    atl_jdbc_encoding: 'UNICODE'
+    atl_jdbc_collation: 'C'
+    atl_jdbc_ctype: 'C'
+    atl_jdbc_template: 'template0'
+  pre_tasks:
+    - name: Create cache dir
+      file:
+        path: '/media/atl/jira/shared/'
+        state: directory
+    - name: Seed version
+      copy:
+        dest: '/media/atl/jira/shared/jira-core.version'
+        content: "7.13.1"
+        force: false  # For idempotency check
+  roles:
+    - role: linux_common
+    - role: product_common
+    - role: product_install

@@ -1,0 +1,14 @@
+---
+
+- name: Install JDK if necessary on Ubuntu
+  package:
+    name:
+      - openjdk-{{ java_major_version }}-jdk-headless
+  when: atl_use_system_jdk
+  tags:
+    - runtime_pkg
+
+- name: Install other base packages on Ubuntu
+  package:
+    name:
+      - fonts-dejavu-core  # Required by installer

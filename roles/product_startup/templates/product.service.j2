@@ -1,0 +1,20 @@
+[Unit]
+Description=Atlassian {{ atl_product_edition }}
+After=network-online.target
+
+[Service]
+User={{ atl_product_user }}
+Group={{ atl_product_user }}
+
+{% for p in atl_startup_systemd_params -%}
+  {{ p }}
+{% endfor %}
+
+ExecStart={{ atl_startup_exec_path }}{% for c in atl_startup_exec_options %} {{ c }}{% endfor %}
+
+Restart=on-failure
+
+LimitNOFILE=65536
+
+[Install]
+WantedBy={{ atl_systemd_service_target }}

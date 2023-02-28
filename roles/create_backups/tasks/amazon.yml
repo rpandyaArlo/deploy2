@@ -1,0 +1,21 @@
+---
+
+- name: Add atlassian-slingshot yum repository
+  yum_repository:
+    name: AtlassianSlingshot
+    file: atlassian-slingshot
+    state: present
+    description: Atlassian Slingshot
+    baseurl: "{{ atl_slingshot_yum_repo_url }}"
+    gpgcheck: no
+
+- name: Install atlassian-slingshot
+  yum:
+    name: atlassian-slingshot
+
+- name: Enable Postgresql from 'extras'
+  command: amazon-linux-extras install -y "postgresql{{ atl_amazon_extras_postgresql_version }}"
+  args:
+    creates: /usr/bin/psql
+  environment:
+    PYTHON: /bin/python

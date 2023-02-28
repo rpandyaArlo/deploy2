@@ -1,0 +1,9 @@
+*~
+*.bak
+*.retry
+__pycache__
+*.pyc
+/.venv
+\#*\#
+.idea
+.vscode

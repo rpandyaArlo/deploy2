@@ -1,0 +1,41 @@
+---
+- hosts: aws_node_local
+  become: true
+
+  vars:
+    # See group_vars/aws_node_local.yml, which pull vars from the environment.
+    atl_product_family: "stash"
+    atl_product_edition: "bitbucket"
+    atl_product_user: "bitbucket"
+
+    atl_product_home: "{{ atl_shared_mountpoint }}/{{ atl_product_edition }}"
+
+    atl_nfs_mountpoint: "{{ atl_shared_mountpoint }}/bitbucket/shared"
+    atl_nfs_target: "{{ atl_shared_mountpoint }}/bitbucket/shared"
+    atl_nfs_version: "3"
+
+    atl_startup_systemd_params:
+      - "UMask=0027"
+      - "LimitNOFILE=4096"
+      - "Environment=BITBUCKET_HOME={{ atl_product_home }}"
+      - "Environment=JVM_MAXIMUM_MEMORY={{ atl_jvm_heap }}"
+      - "Environment=JVM_MINIMUM_MEMORY={{ atl_jvm_heap }}"
+      - "Environment=JVM_SUPPORT_RECOMMENDED_ARGS={{ atl_jvm_opts }}"
+    atl_startup_exec_options:
+      - "-fg"
+      - "--no-search"
+
+  roles:
+    - role: linux_common
+    - role: aws_common
+    - role: nfs_mount
+    - role: product_common
+    - role: product_install
+    - role: database_init
+    - role: restore_backups
+    - role: bitbucket_config
+    - role: product_startup
+    - role: bitbucket_dataset_restore
+      when: atl_bitbucket_dataset_url is search ("(http|https)://")
+  
+

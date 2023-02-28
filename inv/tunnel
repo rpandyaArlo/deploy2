@@ -1,0 +1,7 @@
+# This is for use with an ssh tunnel to the target host via a bastion. To use create a port-forward with ssh e.g:
+#
+#    ssh -L 2222:${TARGETIP}:22 ec2-user@${BASTIONHOST}
+#
+# Where $BASTIONHOST is the bastion public ip/hostname, and $TARGETIP is the private IP of the target host.
+[all]
+ec2-user@localhost ansible_port=2222

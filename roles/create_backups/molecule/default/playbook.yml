@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    # Role default vars must be included because we aren't running the whole role, just a subset of tasks
+    - name: Include role vars
+      include_vars:
+        file: ../../defaults/main.yml
+
+    - name: Install distro-specific backup support packages
+      include_tasks: "../../tasks/{{ ansible_distribution|lower }}.yml"
